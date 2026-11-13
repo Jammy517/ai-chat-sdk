@@ -26,7 +26,7 @@ namespace ai_chat_sdk
     struct Session
     {
         string _id;
-        string _mode_name;  // 模型名称
+        string _mode_name;  // 会话使用的模型名称
         vector<Message> _messages;  // 管理消息
         time_t _createAt;  // 创建会话的时间
         time_t _updateAt;  // 该会话最新一次消息的时间
@@ -63,7 +63,7 @@ namespace ai_chat_sdk
         string _desc;
         string _provider;  // 模型提供者
         string _endpoint;  // 服务器的地址
-        bool _IsAvaiable;
+        bool _IsAvaiable;  // 是否在线
 
         ModleInfo(string mode = "", string desc = "",string provider = "", string endpoint = "")
         :_mode_name(mode),_desc(desc),_provider(provider),_endpoint(endpoint),_IsAvaiable(false)
