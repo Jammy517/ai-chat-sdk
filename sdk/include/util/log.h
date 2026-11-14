@@ -31,7 +31,7 @@ namespace Jammy
 #define FORMAT std::string("[{}:{}]")
 // 问：##__VA_ARGS__ 有什么用
 // 问：宏只是将上层的字符串拼接起来，然后传递给spdlog然后spdlog自动根据文件内容打印到相应的位置吗
-#define DBGUG(fmt,...) Logger::GetLogger()->debug(FORMAT + fmt,__FILE__,__LINE__,##__VA_ARGS__)
+#define DEBUG(fmt,...) Logger::GetLogger()->debug(FORMAT + fmt,__FILE__,__LINE__,##__VA_ARGS__)
 #define INFO(fmt,...) Logger::GetLogger()->info(FORMAT + fmt,__FILE__,__LINE__,##__VA_ARGS__)
 #define ERROR(fmt,...) Logger::GetLogger()->error(FORMAT + fmt,__FILE__,__LINE__,##__VA_ARGS__)
 #define CRIT(fmt,...) Logger::GetLogger()->critical(FORMAT + fmt,__FILE__,__LINE__,##__VA_ARGS__)
