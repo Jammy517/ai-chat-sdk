@@ -108,7 +108,6 @@ namespace ai_chat_sdk
             // 7.设置请求头
             httplib::Headers headers = {
                 {"Authorization", "Bearer " + _apikey}
-                // {"Content-Type", "application/json"}
             };
 
             // 8.发送请求
