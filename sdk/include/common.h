@@ -3,20 +3,19 @@
 #include <string>
 #include <vector>
 
-using namespace std;
 
 namespace ai_chat_sdk
 {
     // 消息管理
     struct Message
     {
-        string _id;  
-        string _role;       
-        string _content;    
+        std::string _id;  
+        std::string _role;       
+        std::string _content;    
         time_t _timestamp;  // 发送消息时的时间
 
         // 问：为什么这里没有初始化_messageid？
-        Message(string role, string content)
+        Message(std::string role, std::string content)
         : _role(role), _content(content), _timestamp(time(nullptr))
         {
         }
@@ -25,13 +24,13 @@ namespace ai_chat_sdk
     // 会话管理
     struct Session
     {
-        string _id;
-        string _mode_name;  // 会话使用的模型名称
-        vector<Message> _messages;  // 管理消息
+        std::string _id;
+        std::string _mode_name;  // 会话使用的模型名称
+        std::vector<Message> _messages;  // 管理消息
         time_t _createAt;  // 创建会话的时间
         time_t _updateAt;  // 该会话最新一次消息的时间
 
-        Session(string mode = "")
+        Session(std::string mode = "")
         :_mode_name(mode),_createAt(time(nullptr)),_updateAt(time(nullptr))
         {}
     };
@@ -40,11 +39,11 @@ namespace ai_chat_sdk
     // 公共配置
     struct Config
     {
-        string _mode_name;
+        std::string _mode_name;
         double _temperature = 0.7;  // 模型设置的温度，控制模型回复的准确度
         int _max_token = 2048;  // 输入的最大token数
 
-        Config(string mode = "")
+        Config(std::string mode = "")
         :_mode_name(mode)
         {}
     };
@@ -53,19 +52,19 @@ namespace ai_chat_sdk
     // 连接云端大模型
     struct ApiConfig : public Config
     {
-        string _api_key;
+        std::string _api_key;
     };
 
     // LLM的描述
     struct ModleInfo
     {
-        string _mode_name;
-        string _desc;
-        string _provider;  // 模型提供者
-        string _endpoint;  // 服务器的地址
+        std::string _mode_name;
+        std::string _desc;
+        std::string _provider;  // 模型提供者
+        std::string _endpoint;  // 服务器的地址
         bool _IsAvaiable;  // 是否在线
 
-        ModleInfo(string mode = "", string desc = "",string provider = "", string endpoint = "")
+        ModleInfo(std::string mode = "", std::string desc = "",std::string provider = "", std::string endpoint = "")
         :_mode_name(mode),_desc(desc),_provider(provider),_endpoint(endpoint),_IsAvaiable(false)
         {}
     };

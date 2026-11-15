@@ -2,6 +2,8 @@
 #include "../sdk/include/util/log.h"
 #include "../sdk/include/DeepSeekProvider.h"
 
+using namespace Jammy;
+
 // 问：这两个参数是什么意思
 TEST(DeepSeekProviderTest,SendMessageDeepSeek)
 {
@@ -23,14 +25,26 @@ TEST(DeepSeekProviderTest,SendMessageDeepSeek)
     };
     std::vector<ai_chat_sdk::Message> messages;
     messages.push_back(ai_chat_sdk::Message("user","你是谁?"));
+    // 3.设置回调函数
+    auto callback = [](const std::string& content,bool isFinish)
+    {
+        INFO("chunk : {}", content);
+        if(isFinish)
+        {
+            INFO("DONE");
+        }
+    };
+    
+    // auto response = provider->SendMessageStream(messages,request_param, callback);
     auto response = provider->SendMessage(messages,request_param);
     ASSERT_FALSE(response.empty());
+    INFO("fulldata : {}", response);
     
 }
 
 int main(int argc,char* argv[])
 {
-    Jammy::Logger::LoggerInit("testLLM","stdout",spdlog::level::debug);
+    Jammy::Logger::LoggerInit("testLLM","stdout",spdlog::level::info);
     testing::InitGoogleTest(&argc,argv);
     return RUN_ALL_TESTS();
 }
