@@ -12,8 +12,8 @@ TEST(DeepSeekProviderTest,SendMessageDeepSeek)
     ASSERT_TRUE(provider);
     // 设置初始化的参数变量
     std::map<std::string,std::string> config;
-    config["api_key"] = getenv("deepseek_apikey");
-    ASSERT_FALSE(config["api_key"].empty());
+    config["apikey"] = getenv("deepseek_apikey");
+    ASSERT_FALSE(config["apikey"].empty());
     config["base_url"] = "https://api.deepseek.com";
     provider->InitModel(config);
     ASSERT_TRUE(provider->IsAvailable());

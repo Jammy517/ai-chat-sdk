@@ -11,16 +11,16 @@ namespace ai_chat_sdk
         bool DeepSeekProvider::InitModel(const std::map<std::string,std::string>& Model_Config)
         {
             // 查看api_key
-            auto it = Model_Config.find("api_key");
+            auto it = Model_Config.find("apikey");
             if(it == Model_Config.end())
             {
-                ERROR("DeepSeekProvider: api_key is empty!");
+                ERROR("DeepSeekProvider: apikey is empty!");
                 return false;
             }
             else
             {
                 _apikey = it->second;
-                INFO("DeepSeekProvider: api_key set success!");
+                INFO("DeepSeekProvider: apikey set success!");
             }
 
             // 查看base_url
@@ -225,7 +225,9 @@ namespace ai_chat_sdk
 
             // 构建流式相应变量
             std::string buffer;         // 单个流式内容
+            // 问：这里的fullResponse可以不需要吗，在外面接收
             std::string fullResponse;   // 完整内容
+            // 问：下面的变量可以不要吗
             bool isError = false;       // 响应是否成功
             std::string errorMessage;          // 错误信息
             int statusCode = 0;         // 状态码
