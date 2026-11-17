@@ -8,10 +8,7 @@
 namespace ai_chat_sdk
 {
     using namespace Jammy;
-    class ChatGPTProvider : public LLMProvider
-    {
-    public:
-        bool InitModel(const std::map<std::string,std::string>& Model_Config) override
+        bool ChatGPTProvider::InitModel(const std::map<std::string,std::string>& Model_Config) 
         {
             auto it = Model_Config.find("apikey");
             if(it != Model_Config.end())
@@ -33,26 +30,26 @@ namespace ai_chat_sdk
             }
             else
             {
-                ERROR("DeepSeekProvider: base_url is empty!");
+                ERROR("ChatGPTProvider: base_url is empty!");
                 return false;
             }
 
             _isAvailable = true;
             return true;
         }
-        std::string GetModelName() override
+        std::string ChatGPTProvider::GetModelName()
         {
             return "gpt-4o-mini";
         }
-        std::string GetModelDesc() override
+        std::string ChatGPTProvider::GetModelDesc() 
         {
             return "OpenAI 推出的轻量级、高性价比模型，核心能力解决 GPT-4 Turbo，但更经济";
         }
-        bool IsAvailable() override
+        bool ChatGPTProvider::IsAvailable()
         {
             return _isAvailable;
         }
-        std::string SendMessage(const std::vector<Message>& messages, const std::map<std::string,std::string>& request_param) override
+        std::string ChatGPTProvider::SendMessage(const std::vector<Message>& messages, const std::map<std::string,std::string>& request_param) 
         {
             // 1.判断模型是否能存活
             if(!IsAvailable())
@@ -101,7 +98,7 @@ namespace ai_chat_sdk
             httplib::Client client(_base_url);
             client.set_connection_timeout(30,0);
             client.set_read_timeout(60,0);
-            client.set_proxy("");        // todo: 配置代理服务器
+            client.set_proxy("127.0.0.1",7890);        // todo: 配置代理服务器
 
             // 7.构建请求头
             httplib::Headers headers = 
@@ -132,7 +129,7 @@ namespace ai_chat_sdk
             std::string error;
             if(!Json::parseFromStream(reader,ss,&response_json,&error))
             {
-                ERROR("Failed to parse DeepSeek API response: {}", error);
+                ERROR("Failed to parse ChatGPT API response: {}", error);
                 return ""; 
             }
 
@@ -153,12 +150,12 @@ namespace ai_chat_sdk
             }
 
             // 解析失败，返回错误信息
-            ERROR("Invalid response format from DeepSeek API");
-            return "Invalid response format from DeepSeek API";
+            ERROR("Invalid response format from ChatGPT API");
+            return "Invalid response format from ChatGPT API";
         }
-        std::string SendMessageStream(const std::vector<Message>& messages, 
+        std::string ChatGPTProvider::SendMessageStream(const std::vector<Message>& messages, 
                                   const std::map<std::string,std::string>& request_param,
-                                  std::function<void(const std::string&,bool)> callback) override
+                                  std::function<void(const std::string&,bool)> callback)
         {
             // 1.判断模型是否能存活
             if(!IsAvailable())
@@ -208,13 +205,14 @@ namespace ai_chat_sdk
             httplib::Client client(_base_url);
             client.set_connection_timeout(30,0);
             client.set_read_timeout(60,0);
-            client.set_proxy("");        // todo: 配置代理服务器
+            client.set_proxy("127.0.0.1",7890);        // todo: 配置代理服务器
 
             // 7.构建请求头
-            httplib::Headers headers;
-            headers["Authorization"] = "Bearer " + _apikey;
-            headers["Content-Type"] = "application/json";
-            headers["Accept"] = "application/json";
+            httplib::Headers headers = {
+                {"Authorization","Bearer" + _apikey},
+                {"Content_Type","application/json"},
+                {"Accept","text/event-stream"}
+            };
 
             // 8.构建请求
             httplib::Request request;
@@ -340,6 +338,5 @@ namespace ai_chat_sdk
             
             return fullMessage;
         }
-    };
 
 } // end namespace 
