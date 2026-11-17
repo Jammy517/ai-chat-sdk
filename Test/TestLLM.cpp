@@ -93,7 +93,7 @@ TEST(GeminiProviderTest,SendMessageChatGPT)
     ASSERT_TRUE(provider);
     // 设置初始化的参数变量
     std::map<std::string,std::string> config;
-    const char* apikey = getenv("gemini_apikey");
+    const char* apikey = getenv("Gemini_apikey");
     ASSERT_NE(apikey, nullptr) << "环境变量 gemini_apikey 未设置";
     config["apikey"] = apikey;
     ASSERT_FALSE(config["apikey"].empty());

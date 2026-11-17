@@ -10,7 +10,7 @@ namespace ai_chat_sdk
     using namespace Jammy;
     bool GeminiProvider::InitModel(const std::map<std::string,std::string>& Model_Config)
     {
-        auto it = Model_Config.find("api_key");
+        auto it = Model_Config.find("apikey");
         if(it == Model_Config.end())
         {
             ERROR("GeminiProvider: apikey is empty!");
@@ -215,13 +215,14 @@ namespace ai_chat_sdk
                 errorMessage = "HTTP Error:" + std::to_string(statusCode);
                 return false;
             }
+            return true;
         };
 
         request.content_receiver = [&](const char* data, size_t data_length, size_t offset, size_t total_length){
             if(isError)
             {
                 ERROR("Gemini API returned error: {}", errorMessage);
-                return "";
+                return false;
             }
 
             buffer.append(data,data_length);
@@ -259,30 +260,30 @@ namespace ai_chat_sdk
 
                 if(chunk.isMember("choices") && chunk["choices"].isArray() && !chunk["choices"].empty())
                 {
-                        Json::Value choice = chunk["choices"][0];
-                        if(choice.isMember("delta") && choice["delta"].isObject() && choice["delta"].isMember("content")){
-                            std::string deltaContent = choice["delta"]["content"].asString();
-                            fulldata += deltaContent;
-                            callback(deltaContent, false);
-                        }
+                    Json::Value choice = chunk["choices"][0];
+                    if(choice.isMember("delta") && choice["delta"].isObject() && choice["delta"].isMember("content"))
+                    {
+                        std::string deltaContent = choice["delta"]["content"].asString();
+                        fulldata += deltaContent;
+                        callback(deltaContent, false);
+                    }
                 }
             }
-
-            auto res = client.send(request);
-            if(!res){
-                ERROR("GeminiProvider::sendMessageStream: failed to send request, error: {}", to_string(res.error()));
-                return "";
-            }
-            
-            if(!streamFinish)
-            {
-                WARNING("stream ended without [DONE] marker");
-                callback(fulldata, true);
-            }
-
-            
+            return true;           
         };
 
+        auto res = client.send(request);
+        if(!res){
+            ERROR("GeminiProvider::sendMessageStream: failed to send request, error: {}", to_string(res.error()));
+            return "";
+        }
+        
+        if(!streamFinish)
+        {
+            WARNING("stream ended without [DONE] marker");
+            callback(fulldata, true);
+        }
+        return fulldata;
 
     }
 
