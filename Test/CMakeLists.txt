@@ -15,7 +15,8 @@ set(CMAKE_BUILD_TYPE Debug)
 add_executable(LLMTest TestLLM.cpp ../sdk/src/util/log.cpp 
 ../sdk/src/DeepSeekProvider.cpp 
 ../sdk/src/GeminiProvider.cpp 
-../sdk/src/ChatGPTProvider.cpp)
+../sdk/src/ChatGPTProvider.cpp 
+../sdk/src/OllamaProvider.cpp)
 
 # 设置输出⽬录
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/build)

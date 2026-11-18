@@ -3,6 +3,7 @@
 #include "../sdk/include/ChatGPTProvider.h"
 #include "../sdk/include/DeepSeekProvider.h"
 #include "../sdk/include/GeminiProvider.h"
+#include "../sdk/include/OllamaProvider.h"
 
 using namespace Jammy;
 
@@ -86,8 +87,6 @@ TEST(GeminiProviderTest,SendMessageChatGPT)
     
 }
 
-#endif
-
 TEST(ChatGPTProviderTest,SendMessageChatGPT)
 {
     // 1.初始化大模型
@@ -125,6 +124,44 @@ TEST(ChatGPTProviderTest,SendMessageChatGPT)
     
 }
 
+#endif
+
+TEST(OllamaProviderTest,SendMessageChatGPT)
+{
+    // 1.初始化大模型
+    auto provider = std::make_shared<ai_chat_sdk::OllamaProvider>();
+    ASSERT_TRUE(provider);
+    // 设置初始化的参数变量
+    std::map<std::string,std::string> config;
+    config["model_name"] = "deepseek-r1:1.5b";
+    config["model_desc"] = "本地部署deepseek-r1:1.5b模型，采用专家混合架构，专注于深度理解与推理";
+    config["base_url"] = "http://localhost:11434";
+    provider->InitModel(config);
+    ASSERT_TRUE(provider->IsAvailable());
+
+    // 2.设置SendMessahe中的参数
+    std::map<std::string,std::string> request_param = {
+        {"temperature","0.7"},
+        {"max_tokens","2048"}
+    };
+    std::vector<ai_chat_sdk::Message> messages;
+    messages.push_back(ai_chat_sdk::Message("user","你是谁?"));
+    // 3.设置回调函数
+    auto callback = [](const std::string& content,bool isFinish)
+    {
+        INFO("chunk : {}", content);
+        if(isFinish)
+        {
+            INFO("DONE");
+        }
+    };
+    
+    auto response = provider->SendMessageStream(messages,request_param, callback);
+    // auto response = provider->SendMessage(messages,request_param);
+    ASSERT_FALSE(response.empty());
+    INFO("fulldata : {}", response);
+    
+}
 
 int main(int argc,char* argv[])
 {
