@@ -33,7 +33,7 @@ namespace ai_chat_sdk
     }
     std::string GeminiProvider::GetModelName() 
     {
-        return "gemini-2.0-flash";
+        return "gemini-3.5-flash";
     }
     std::string GeminiProvider::GetModelDesc() 
     {
@@ -59,6 +59,7 @@ namespace ai_chat_sdk
         if(it != request_param.end())
             temperature = std::stof(request_param.at("temperature"));
         it = request_param.find("max_tokens");
+        if(it != request_param.end())
             max_tokens = std::stoi(it->second);
 
         // 3.构建历史会话
@@ -73,7 +74,7 @@ namespace ai_chat_sdk
         
         // 4.构建请求体
         Json::Value body;
-        body["model"] = "gemini-3.5-flash";
+        body["model"] = GetModelName();
         body["messages"] = messageArray;
         body["temperature"] = temperature;
         body["max_tokens"] = max_tokens;  // 由于Gemini没有直接显示可以省略
@@ -90,14 +91,22 @@ namespace ai_chat_sdk
 
         // 7.构建请求头
         httplib::Headers header = {
-            {"Authorization", _apikey}
+            {"Authorization", "Bearer " + _apikey}
         };
 
         // 8.发送请求
         auto response = client.Post("/v1beta/openai/chat/completions",header,json_string,"application/json");
         if(!response)
         {
-            ERROR("GeminiProvider: request failed!");
+            ERROR("GeminiProvider: request failed! error: {}", httplib::to_string(response.error()));
+            return "";
+        }
+
+        INFO("GeminiProvider: response status: {}", response->status);
+        INFO("GeminiProvider: response body: {}", response->body);
+        if(response->status != 200)
+        {
+            ERROR("GeminiProvider: API returned non-200 status: {} - {}", response->status, response->body);
             return "";
         }
 
@@ -106,7 +115,7 @@ namespace ai_chat_sdk
         Json::CharReaderBuilder reader;
         std::string err;
         std::istringstream ss(response->body);
-        if(Json::parseFromStream(reader,ss,&json_res,&err))
+        if(!Json::parseFromStream(reader,ss,&json_res,&err))
         {
             ERROR("GeminiProvider: parse json failed!");
             return "";
@@ -121,7 +130,7 @@ namespace ai_chat_sdk
                 json_res["choices"].isArray() &&
                 !json_res["choices"].empty())
             {
-                Json::Value json_choice = json_res["choices"];
+                Json::Value json_choice = json_res["choices"][0];
                 if(json_choice.isMember("message") &&
                     json_choice["message"].isObject() &&
                     json_choice["message"].isMember("content") &&
@@ -155,6 +164,7 @@ namespace ai_chat_sdk
         if(it != request_param.end())
             temperature = std::stof(request_param.at("temperature"));
         it = request_param.find("max_tokens");
+        if(it != request_param.end())
             max_tokens = std::stoi(it->second);
 
         // 3.构建历史消息
@@ -169,7 +179,7 @@ namespace ai_chat_sdk
 
         // 4.构建请求体
         Json::Value body;
-        body["model"] = "gemini-3.5-flash";
+        body["model"] = GetModelName();
         body["messages"] = messageArray;
         body["temperature"] = temperature;
         body["max_tokens"] = max_tokens;  
@@ -187,7 +197,7 @@ namespace ai_chat_sdk
 
         // 7.构建请求头
         httplib::Headers header = {
-            {"Authorization", _apikey},
+            {"Authorization", "Bearer " + _apikey},
             {"Content-Type", "application/json"},
             {"Accept", "text/event-stream"}
         };
@@ -231,43 +241,44 @@ namespace ai_chat_sdk
             size_t pos = 0;
             while((pos = buffer.find("\n\n")) != std::string::npos)
             {
-                std::string event = buffer.substr(pos);
+                std::string event = buffer.substr(0,pos);
                 buffer.erase(0,pos+2);
 
-                if(event.empty() || event == ":")
+                if(event.empty() || event[0] == ':')
                     continue;
                 
-                if(buffer.compare(0,6,"data: ") == 0)
+                if(event.compare(0,6,"data: ") == 0)
                 {
                     std::string json_string = event.substr(6);
                     
                     if(json_string == "[DONE]")
                     {
                         streamFinish = true;
+                        callback("", true);
+                        return true;
+                    }
+
+                    Json::Value chunk;
+                    Json::CharReaderBuilder reader;
+                    std::string errMessage;
+                    std::istringstream iss(json_string);
+                    if(!Json::parseFromStream((reader),iss,&chunk,&errMessage))
+                    {
+                        ERROR("GeminiProvider: parse json failed! error: {}", errMessage);
                         continue;
                     }
-                }
 
-                Json::Value chunk;
-                Json::CharReaderBuilder reader;
-                std::string errMessage;
-                std::istringstream iss(json_string);
-                if(!Json::parseFromStream((reader),iss,&chunk,&errMessage))
-                {
-                    ERROR("GeminiProvider: parse json failed! error: {}", errMessage);
-                    continue;
-                }
-
-                if(chunk.isMember("choices") && chunk["choices"].isArray() && !chunk["choices"].empty())
-                {
-                    Json::Value choice = chunk["choices"][0];
-                    if(choice.isMember("delta") && choice["delta"].isObject() && choice["delta"].isMember("content"))
+                    if(chunk.isMember("choices") && chunk["choices"].isArray() && !chunk["choices"].empty())
                     {
-                        std::string deltaContent = choice["delta"]["content"].asString();
-                        fulldata += deltaContent;
-                        callback(deltaContent, false);
+                        Json::Value choice = chunk["choices"][0];
+                        if(choice.isMember("delta") && choice["delta"].isObject() && choice["delta"].isMember("content"))
+                        {
+                            std::string deltaContent = choice["delta"]["content"].asString();
+                            fulldata += deltaContent;
+                            callback(deltaContent, false);
+                        }
                     }
-                }
+                }        
             }
             return true;           
         };

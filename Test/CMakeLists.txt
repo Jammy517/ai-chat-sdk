@@ -12,7 +12,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_BUILD_TYPE Debug)
 
 # 添加可执⾏⽂件
-add_executable(LLMTest TestLLM.cpp ../sdk/src/util/log.cpp ../sdk/src/DeepSeekProvider.cpp ../sdk/src/GeminiProvider.cpp)
+add_executable(LLMTest TestLLM.cpp ../sdk/src/util/log.cpp 
+../sdk/src/DeepSeekProvider.cpp 
+../sdk/src/GeminiProvider.cpp 
+../sdk/src/ChatGPTProvider.cpp)
 
 # 设置输出⽬录
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/build)

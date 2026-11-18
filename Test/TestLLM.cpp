@@ -47,16 +47,18 @@ TEST(DeepSeekProviderTest,SendMessageChatGPT)
     
 }
 
-TEST(ChatGPTProviderTest,SendMessageChatGPT)
+TEST(GeminiProviderTest,SendMessageChatGPT)
 {
     // 1.初始化大模型
-    auto provider = std::make_shared<ai_chat_sdk::ChatGPTProvider>();
+    auto provider = std::make_shared<ai_chat_sdk::GeminiProvider>();
     ASSERT_TRUE(provider);
     // 设置初始化的参数变量
     std::map<std::string,std::string> config;
-    config["apikey"] = getenv("chatgpt_apikey");
+    const char* apikey = getenv("Gemini_apikey");
+    ASSERT_NE(apikey, nullptr) << "环境变量 gemini_apikey 未设置";
+    config["apikey"] = apikey;
     ASSERT_FALSE(config["apikey"].empty());
-    config["base_url"] = "https://api.openai.com";
+    config["base_url"] = "https://generativelanguage.googleapis.com";
     provider->InitModel(config);
     ASSERT_TRUE(provider->IsAvailable());
 
@@ -77,8 +79,8 @@ TEST(ChatGPTProviderTest,SendMessageChatGPT)
         }
     };
     
-    // auto response = provider->SendMessageStream(messages,request_param, callback);
-    auto response = provider->SendMessage(messages,request_param);
+    auto response = provider->SendMessageStream(messages,request_param, callback);
+    // auto response = provider->SendMessage(messages,request_param);
     ASSERT_FALSE(response.empty());
     INFO("fulldata : {}", response);
     
@@ -86,18 +88,16 @@ TEST(ChatGPTProviderTest,SendMessageChatGPT)
 
 #endif
 
-TEST(GeminiProviderTest,SendMessageChatGPT)
+TEST(ChatGPTProviderTest,SendMessageChatGPT)
 {
     // 1.初始化大模型
-    auto provider = std::make_shared<ai_chat_sdk::GeminiProvider>();
+    auto provider = std::make_shared<ai_chat_sdk::ChatGPTProvider>();
     ASSERT_TRUE(provider);
     // 设置初始化的参数变量
     std::map<std::string,std::string> config;
-    const char* apikey = getenv("Gemini_apikey");
-    ASSERT_NE(apikey, nullptr) << "环境变量 gemini_apikey 未设置";
-    config["apikey"] = apikey;
+    config["apikey"] = getenv("chatgpt_apikey");
     ASSERT_FALSE(config["apikey"].empty());
-    config["base_url"] = "https://generativelanguage.googleapis.com";
+    config["base_url"] = "https://api.openai.com";
     provider->InitModel(config);
     ASSERT_TRUE(provider->IsAvailable());
 

@@ -14,11 +14,11 @@ namespace ai_chat_sdk
             if(it != Model_Config.end())
             {
                 _apikey = it->second;
-                INFO("DeepSeekProvider: apikey set success!");
+                INFO("ChatGPTProvider: apikey set success!");
             }
             else
             {
-                ERROR("DeepSeekProvider: apikey is empty!");
+                ERROR("ChatGPTProvider: apikey is empty!");
                 return false;
             }
 
@@ -26,7 +26,7 @@ namespace ai_chat_sdk
             if(it != Model_Config.end())
             {
                 _base_url = it->second;
-                INFO("DeepSeekProvider: base_url set success!");
+                INFO("ChatGPTProvider: base_url set success!");
             }
             else
             {
@@ -85,7 +85,7 @@ namespace ai_chat_sdk
             // 4.构建请求体
             Json::Value requestBody;
             requestBody["model"] = GetModelName();
-            requestBody["messages"] = messageArray;
+            requestBody["input"] = messageArray;
             requestBody["temperature"] = temperature;
             requestBody["max_output_tokens"] = max_output_tokens;
 
@@ -110,15 +110,15 @@ namespace ai_chat_sdk
             auto response = client.Post("/v1/responses",headers,json_string,"application/json");
             if(!response)
             {
-                ERROR("Failed to connect to DeepSeep API – check network and SSL") ;
+                ERROR("Failed to connect to ChatGPT API, error: {}", httplib::to_string(response.error()));
                 return "" ;
             }
-            DEBUG("DeepSeek API response status: {}", response->status);
-            DEBUG("DeepSeek API response body: {}", response->body);
+            DEBUG("ChatGPT API response status: {}", response->status);
+            DEBUG("ChatGPT API response body: {}", response->body);
             // 检查响应是否成功
             if(response->status != 200)
             {
-                ERROR("DeepSeek API returned non-200 status: {} - {}", response->status,response->body);
+                ERROR("ChatGPT API returned non-200 status: {} - {}", response->status,response->body);
                 return "";
             }
             
@@ -141,17 +141,17 @@ namespace ai_chat_sdk
                 response_json["output"][0]["content"].isArray() &&
                 !response_json["output"][0]["content"].empty())
             {
-                Json::Value json_content = response_json["output"][0]["content"];
-                if(json_content.isMember("text"))
+                Json::Value json_content = response_json["output"][0]["content"][0];
+                if(json_content.isMember("text") && json_content["text"].isString())
                 {
-                    std::string reply = json_content["content"].asString();
+                    std::string reply = json_content["text"].asString();
                     return reply;
                 }
             }
 
             // 解析失败，返回错误信息
             ERROR("Invalid response format from ChatGPT API");
-            return "Invalid response format from ChatGPT API";
+            return "";
         }
         std::string ChatGPTProvider::SendMessageStream(const std::vector<Message>& messages, 
                                   const std::map<std::string,std::string>& request_param,
@@ -191,7 +191,7 @@ namespace ai_chat_sdk
             // 4.构建请求体
             Json::Value requestBody;
             requestBody["model"] = GetModelName();
-            requestBody["messages"] = messageArray;
+            requestBody["input"] = messageArray;
             requestBody["temperature"] = temperature;
             requestBody["max_output_tokens"] = max_output_tokens;
             requestBody["stream"] = true;
@@ -209,9 +209,9 @@ namespace ai_chat_sdk
 
             // 7.构建请求头
             httplib::Headers headers = {
-                {"Authorization","Bearer" + _apikey},
-                {"Content_Type","application/json"},
-                {"Accept","text/event-stream"}
+                {"Authorization", "Bearer " + _apikey},
+                {"Content-Type", "application/json"},
+                {"Accept", "text/event-stream"}
             };
 
             // 8.构建请求
@@ -233,7 +233,9 @@ namespace ai_chat_sdk
                 statusCode = res.status;  
                 if(statusCode != 200)
                 {
-                    ERROR("ChatGPTProvider: API returned non-200 status: {} - {}", res.status,res.body);
+                    getError = true;
+                    ErrorMsg = res.body;
+                    ERROR("ChatGPTProvider: API returned non-200 status: {} - {}", res.status,ErrorMsg);
                     return false;
                 }
                 return true;
@@ -241,8 +243,8 @@ namespace ai_chat_sdk
 
             request.content_receiver = [&](const char* data,size_t data_length,size_t offset,size_t total_length){
 
-                // 确保响应正确
-                if(!getError)
+                // 如果HTTP请求失败，不用继续接收后续数据
+                if(getError)
                 {
                     ERROR("ChatGPTProvider API returned error: {}", ErrorMsg);
                     return false;
@@ -284,12 +286,12 @@ namespace ai_chat_sdk
                         continue;
                     } 
 
-                    if(eventType == "response.out_text.delta")
+                    if(eventType == "response.output_text.delta")
                     {
                         // 每次解析的结果返回给上层，让用户看起来是个流式响应
-                        if(chunk.isMember("detla") && chunk["detla"].isString())
+                        if(chunk.isMember("delta") && chunk["delta"].isString())
                         {
-                            std::string data = chunk["detla"].asString();
+                            std::string data = chunk["delta"].asString();
                             callback(data,false);
                         }
                     }
@@ -299,13 +301,12 @@ namespace ai_chat_sdk
                         if(chunk.isMember("item") && chunk["item"].isObject())
                         {
                             Json::Value json_item = chunk["item"];
-                            if(json_item.isMember("content") && json_item["content"].isArray() && !json_item["content"][0].empty())
+                            if(json_item.isMember("content") && json_item["content"].isArray() && !json_item["content"].empty())
                             {
-                                Json::Value json_content = json_item["content"];
-                                if(json_content.isMember("text") && json_content["text"].isString())
+                                if(json_item["content"][0].isMember("text") &&
+                                    json_item["content"][0]["text"].isString())
                                 {
-                                    std::string reply = json_content["text"].asString();
-                                    fullMessage = reply;
+                                    fullMessage += json_item["content"][0]["text"].asString();
                                 }
                             }
                         }
