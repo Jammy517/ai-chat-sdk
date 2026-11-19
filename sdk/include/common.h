@@ -56,16 +56,16 @@ namespace ai_chat_sdk
     };
 
     // LLM的描述
-    struct ModleInfo
+    struct ModelInfo
     {
         std::string _mode_name;
         std::string _desc;
         std::string _provider;  // 模型提供者
         std::string _endpoint;  // 服务器的地址
-        bool _IsAvaiable;  // 是否在线
+        bool _isAvailable;  // 是否在线
 
-        ModleInfo(std::string mode = "", std::string desc = "",std::string provider = "", std::string endpoint = "")
-        :_mode_name(mode),_desc(desc),_provider(provider),_endpoint(endpoint),_IsAvaiable(false)
+        ModelInfo(std::string mode = "", std::string desc = "",std::string provider = "", std::string endpoint = "")
+        :_mode_name(mode),_desc(desc),_provider(provider),_endpoint(endpoint),_isAvailable(false)
         {}
     };
-}
+} // end ai_chat_sdk
