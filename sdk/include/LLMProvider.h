@@ -28,4 +28,4 @@ namespace ai_chat_sdk
         std::string _apikey;
         std::string _base_url;  // 模型地址 
     };
-}
+} // end ai_chat_sdk

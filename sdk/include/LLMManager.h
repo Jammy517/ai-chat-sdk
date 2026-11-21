@@ -13,10 +13,11 @@ namespace ai_chat_sdk
     {
     public:
         // 注册模型提供者
+        // 问：为什么要提供注册模型这个函数
         bool registerModel(const std::string& model_name,std::unique_ptr<LLMProvider> provider);
         // 初始化指定模型
         bool initModel(const std::string& model_name,const std::map<std::string,std::string>& Model_Config);
-        // 获取可用模型
+        // 获取可用模型信息
         std::vector<ModelInfo> getAvailableModels();
         // 判断模型是否存活
         bool isModelAvailable(const std::string& model_name);
