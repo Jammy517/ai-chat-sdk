@@ -22,7 +22,7 @@ namespace ai_chat_sdk {
         std::shared_ptr<Session> getSessionInfo(const std::string& sessionId);
         // 更新会话的时间戳
         // 问：这里为什么要传入时间戳
-        bool updateSessionStamp(const std::string& sessionId, time_t timestamp);
+        bool updateSessionTimestamp(const std::string& sessionId, time_t timestamp);
         // 获取所有会话信息
         std::vector<std::shared_ptr<Session>> getAllSessionInfo();
         // 获取所有的会话id

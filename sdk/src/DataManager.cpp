@@ -194,7 +194,7 @@ namespace ai_chat_sdk {
     }
     // 更新会话的时间戳
     // 问：这里为什么要传入时间戳
-    bool DataManager::updateSessionStamp(const std::string& sessionId, time_t timestamp)
+    bool DataManager::updateSessionTimestamp(const std::string& sessionId, time_t timestamp)
     {
         std::lock_guard<std::mutex> lock(_mutex);
 

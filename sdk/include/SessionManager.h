@@ -5,6 +5,7 @@
 #include "common.h"
 #include <mutex>
 #include <atomic>
+#include "DataManager.h"
 #include <vector>
 
 namespace ai_chat_sdk
@@ -12,6 +13,8 @@ namespace ai_chat_sdk
     class SessionManager
     {
     public:
+        // 构造函数，在开启会话管理的时候就直接开启数据管理，这样对会话和信息的操作直接可以插入数据库
+        SessionManager(const std::string& dbName);
         // 创建会话：通过模型创建会话，并返回会话id
         std::string initSession(std::string& model_name);
         // 通过会话id返回会话信息
@@ -43,5 +46,7 @@ namespace ai_chat_sdk
         // 设置会话个数
         // 问：为什么要用atomic?atomic的用法
         std::atomic<int64_t> _sessionCounter = {0};
+        // 创建数据管理类，将数据写入数据库
+        DataManager _dataManager;
     };
 } // end ai_chat_sdk

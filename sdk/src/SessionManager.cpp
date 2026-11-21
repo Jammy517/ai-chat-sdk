@@ -7,6 +7,17 @@
 namespace ai_chat_sdk
 {
     using namespace Jammy;
+    // 构造函数
+    SessionManager::SessionManager(const std::string& dbName)
+    : _dataManager(dbName)
+    {
+        // 构建了会话之后，将数据库中的数据加载到内存中
+        auto sessions = _dataManager.getAllSessionInfo(); 
+        for(const auto& session : sessions)
+        {
+            _sessions[session->_id] = session;
+        }
+    }
     // id格式 : session_时间戳_会话计数
     std::string SessionManager::generateSessionId()
     {
@@ -47,6 +58,9 @@ namespace ai_chat_sdk
         session->_updateAt = session->_createAt;
 
         _mutex.unlock();
+
+        // 插入数据库
+        _dataManager.insertSession(*session);
         return sessionId;
     }
 
@@ -56,13 +70,26 @@ namespace ai_chat_sdk
         auto it = _sessions.find(sessionId);
         if(it == _sessions.end())
         {
-            ERROR("session is not exists");
+            // 这里说明没找到，会话id错误
+            WARNING("session is not exists");
             _mutex.unlock();
             return nullptr;
         }
+
+        // 锁内拷贝 shared_ptr，让数据库 IO 在锁外进行
         std::shared_ptr<Session> session = it->second;
         _mutex.unlock();
+
+        auto messages = _dataManager.getAllMessage(sessionId);
+
+        // 回写前重新加锁：_messages 由 _mutex 保护，
+        // 无锁写入会与 addMessage / getHistoryMessage 竞争
+        _mutex.lock();
+        session->_messages = std::move(messages);
+        _mutex.unlock();
         return session;
+        
+
     }
 
     bool SessionManager::addMessage(const std::string& sessionId, const Message& message)
@@ -89,6 +116,9 @@ namespace ai_chat_sdk
         // 更新会话时间
         it->second->_updateAt = time(nullptr);
         _mutex.unlock();
+        
+        // 将消息插入数据库
+        _dataManager.insertMessage(sessionId,msg);
         return true;
         
     }
@@ -104,9 +134,10 @@ namespace ai_chat_sdk
             _mutex.unlock();
             return {};
         }
-        std::shared_ptr<Session> session = it->second;
+        // 在锁内拷贝消息列表，避免解锁后读取与写入端竞争
+        auto messages = it->second->_messages;
         _mutex.unlock();
-        return session->_messages;
+        return messages;
     }
 
     std::vector<std::string> SessionManager::getSessionLists()
@@ -128,7 +159,7 @@ namespace ai_chat_sdk
         // 将排序后的会话插入vector中
         std::vector<std::string> sessions;
         sessions.reserve(_sessions.size());
-        for(auto session : temp)
+        for(const auto& session : temp)
         {
             sessions.push_back(session.second->_id);
         }
@@ -150,6 +181,9 @@ namespace ai_chat_sdk
         }
         _sessions.erase(sessionId);
         _mutex.unlock();
+
+        // 删除数据库中的会话
+        _dataManager.deleteSession(sessionId);
     }
 
     void SessionManager::deleteAllSession()
@@ -157,6 +191,8 @@ namespace ai_chat_sdk
         _mutex.lock();
         _sessions.clear();
         _mutex.unlock();
+        // 删除数据库中的所有会话
+        _dataManager.deleteAllSession();
     }
 
     void SessionManager::updateSessionTimestamp(const std::string& sessionId)
@@ -164,8 +200,18 @@ namespace ai_chat_sdk
         _mutex.lock();
         auto it = _sessions.find(sessionId);
         if(it != _sessions.end())
+        {
             it->second->_updateAt = time(nullptr);
-        _mutex.unlock();
+            _mutex.unlock();
+
+            // 更新数据库中的会话时间戳
+            _dataManager.updateSessionTimestamp(sessionId, it->second->_updateAt);
+        }
+        else
+        {
+            ERROR("updateSessionTimestamp: session is not exists");
+            _mutex.unlock();
+        }
     }
 
     size_t SessionManager::sessionTotal()
