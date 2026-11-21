@@ -208,7 +208,7 @@ namespace ai_chat_sdk {
         int rc = sqlite3_prepare_v2(_db,updateSessionStamp.c_str(),-1,&stmt,nullptr);
         if(rc != SQLITE_OK)
         {
-            ERROR("updateSessionStamp - 准备sql语句失败：{}", sqlite3_errmsg(_db));
+            ERROR("updateSessionTimestamp - 准备sql语句失败：{}", sqlite3_errmsg(_db));
             return false;
         }
 
@@ -220,13 +220,13 @@ namespace ai_chat_sdk {
         rc = sqlite3_step(stmt);
         if(rc != SQLITE_DONE)
         {
-            ERROR("updateSessionStamp - 执行sql语句失败：{}", sqlite3_errmsg(_db));
+            ERROR("updateSessionTimestamp - 执行sql语句失败：{}", sqlite3_errmsg(_db));
             return false;
         }
 
         // 释放sql语句
         sqlite3_finalize(stmt);
-        INFO("updateSessionStamp - 更新会话时间戳成功：{}", sessionId);
+        INFO("updateSessionTimestamp - 更新会话时间戳成功：{}", sessionId);
         return true;
     }
     // 获取所有会话信息,并按照更新时间降序排列
