@@ -27,7 +27,7 @@ namespace ai_chat_sdk
         it = Model_Config.find("base_url");
         if(it == Model_Config.end())
         {
-            _base_url = "https://api.deepseek.com"
+            _base_url = "https://api.deepseek.com";
         }
         else
         {

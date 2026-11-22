@@ -46,6 +46,10 @@ namespace ai_chat_sdk
         Config(std::string mode = "")
         :_mode_name(mode)
         {}
+
+        // 虚析构：1) 使 Config 成为多态类型，dynamic_pointer_cast 才能工作；
+        // 2) 通过基类指针 delete 派生类对象时才能正确析构派生类部分
+        virtual ~Config() = default;
     };
 
     // 问：struct也能继承基类？
@@ -60,7 +64,6 @@ namespace ai_chat_sdk
     {
         // 问：这里需要添加模型名字和模型描述吗
         std::string _modelDesc;
-        std::string _modelName;
         std::string _endpoint;
     };
 

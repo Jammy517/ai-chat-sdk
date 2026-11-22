@@ -68,11 +68,11 @@ namespace ai_chat_sdk
         auto it = _modelInfo.find(model_name);
         if(it == _modelInfo.end())
         {
-            ERROR("model is not exist");
+            DEBUG("model {} is not registered yet", model_name);
             return false;
         }
         // 判断模型是否存活
-        return _modelInfo[model_name]._isAvailable;
+        return it->second._isAvailable;
     }
 
     std::string LLMManager::sendMessage(const std::string& model_name, 

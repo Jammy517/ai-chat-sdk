@@ -41,7 +41,7 @@ namespace ai_chat_sdk
         return os.str();
     }
 
-    std::string SessionManager::initSession(std::string& model_name)
+    std::string SessionManager::initSession(const std::string& modelName)
     {
         // unordered_map进行操着时需要加锁
         _mutex.lock();
@@ -49,7 +49,7 @@ namespace ai_chat_sdk
         std::string sessionId = generateSessionId();
 
         // 构建会话信息
-        std::shared_ptr<Session> session = std::make_shared<Session>(model_name);
+        std::shared_ptr<Session> session = std::make_shared<Session>(modelName);
 
         // 将会话添加到会话列表中
         _sessions[sessionId] = session;
@@ -64,7 +64,7 @@ namespace ai_chat_sdk
         return sessionId;
     }
 
-    std::shared_ptr<Session> SessionManager::getSession(std::string& sessionId)
+    std::shared_ptr<Session> SessionManager::getSession(const std::string& sessionId)
     {
         _mutex.lock();
         auto it = _sessions.find(sessionId);
@@ -88,8 +88,6 @@ namespace ai_chat_sdk
         session->_messages = std::move(messages);
         _mutex.unlock();
         return session;
-        
-
     }
 
     bool SessionManager::addMessage(const std::string& sessionId, const Message& message)
@@ -123,7 +121,7 @@ namespace ai_chat_sdk
         
     }
     // 获取该会话中的所有历史消息
-    std::vector<Message> SessionManager::getHistoryMessage(std::string sessionId)
+    std::vector<Message> SessionManager::getHistoryMessage(const std::string& sessionId)
     {
         _mutex.lock();
         // 获取对应的会话
@@ -169,7 +167,7 @@ namespace ai_chat_sdk
         
     }
 
-    void SessionManager::deleteSession(const std::string sessionId)
+    bool SessionManager::deleteSession(const std::string& sessionId)
     {
         _mutex.lock();
         auto it = _sessions.find(sessionId);
@@ -177,13 +175,14 @@ namespace ai_chat_sdk
         {
             ERROR("deleteSession: session is not exists,please input sessionId and try again");
             _mutex.unlock();
-            return;
+            return false;
         }
         _sessions.erase(sessionId);
         _mutex.unlock();
 
         // 删除数据库中的会话
         _dataManager.deleteSession(sessionId);
+        return true;
     }
 
     void SessionManager::deleteAllSession()

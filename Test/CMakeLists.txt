@@ -16,7 +16,11 @@ add_executable(LLMTest TestLLM.cpp ../sdk/src/util/log.cpp
 ../sdk/src/DeepSeekProvider.cpp 
 ../sdk/src/GeminiProvider.cpp 
 ../sdk/src/ChatGPTProvider.cpp 
-../sdk/src/OllamaProvider.cpp)
+../sdk/src/OllamaProvider.cpp 
+../sdk/src/SessionManager.cpp 
+../sdk/src/ChatSDK.cpp 
+../sdk/src/DataManager.cpp
+../sdk/src/LLMManager.cpp)
 
 # 设置输出⽬录
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/build)
@@ -36,5 +40,4 @@ CPPHTTPLIB_OPENSSL_SUPPORT
 )
 
 # 链接库
-target_link_libraries(LLMTest fmt jsoncpp OpenSSL::SSL OpenSSL::Crypto spdlog
-gtest)
+target_link_libraries(LLMTest fmt jsoncpp OpenSSL::SSL OpenSSL::Crypto spdlog gtest sqlite3)

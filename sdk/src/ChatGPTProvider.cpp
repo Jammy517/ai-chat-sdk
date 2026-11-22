@@ -18,7 +18,8 @@ namespace ai_chat_sdk
             }
             else
             {
-               _base_url = "https://api.openai.com";
+                ERROR("ChatGPTProvider: apikey is empty!");
+                return false;
             }
 
             it = Model_Config.find("base_url");
@@ -29,8 +30,8 @@ namespace ai_chat_sdk
             }
             else
             {
-                ERROR("ChatGPTProvider: base_url is empty!");
-                return false;
+                _base_url = "https://api.openai.com";
+
             }
 
             _isAvailable = true;

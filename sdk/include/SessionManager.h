@@ -14,20 +14,22 @@ namespace ai_chat_sdk
     {
     public:
         // 构造函数，在开启会话管理的时候就直接开启数据管理，这样对会话和信息的操作直接可以插入数据库
-        SessionManager(const std::string& dbName);
+        // dbName 带默认值：这个构造函数同时兼任默认构造函数，
+        // 使 SessionManager()/SessionManager("my.db") 两种写法都合法
+        SessionManager(const std::string& dbName = "sessionDB.db");
         // 创建会话：通过模型创建会话，并返回会话id
-        std::string initSession(std::string& model_name);
+        std::string initSession(const std::string& modelName);
         // 通过会话id返回会话信息
-        std::shared_ptr<Session> getSession(std::string& sessionId);
+        std::shared_ptr<Session> getSession(const std::string& sessionId);
         // 将消息添加到会话中
         bool addMessage(const std::string& sessionId, const Message& message);
         // 获取该会话中的所有历史消息
-        std::vector<Message> getHistoryMessage(std::string sessionId);
+        std::vector<Message> getHistoryMessage(const std::string& sessionId);
         // 获取会话列表，返回所有会话
         // 问：为什么返回会话id不反回会话对象
         std::vector<std::string> getSessionLists(); 
         // 删除会话
-        void deleteSession(std::string sessionId);
+        bool deleteSession(const std::string& sessionId);
         // 删除所有会话
         void deleteAllSession();
         // 更新会话时间戳
