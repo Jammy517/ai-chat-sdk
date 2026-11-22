@@ -4,6 +4,7 @@ namespace ai_chat_server
 {
     using namespace Jammy;
     ChatServer::ChatServer(const ChatServerConfig& config)
+    : _config(config)
     {
         // 初始化SDK
         _sdk = std::make_shared<ai_chat_sdk::ChatSDK>();

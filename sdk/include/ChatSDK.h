@@ -43,6 +43,7 @@ namespace ai_chat_sdk
         // 初始化所有的模型
         void initAllModels(const std::vector<std::shared_ptr<Config>> configs);
         // 初始化api模型
+
         bool initApiModels(const std::shared_ptr<ApiConfig> config);
         // 初始化ollama模型
         bool initOllamaModels(const std::shared_ptr<OllamaConfig> config);

@@ -320,7 +320,7 @@ namespace ai_chat_sdk
         Message user_message("user",message);
         _sessionManager.addMessage(sessionId,user_message);
         // 获取历史会话消息
-        const auto history_messages = _sessionManager.getHistoryMessage(sessionId);
+        auto history_messages = _sessionManager.getHistoryMessage(sessionId);
 
         // 在配置列表中找相应模型
         auto it = _modelConfig.find(session->_mode_name);
