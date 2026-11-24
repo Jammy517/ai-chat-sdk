@@ -40,6 +40,26 @@ namespace ai_chat_server
         bool stop();
         // 判断服务器是否存活
         bool isAvailable() const;
+    // 构建接口，用于处理http请求和响应
+    private:
+        // 设置路由规则
+        void setRoutes();
+        // 构建错误回应
+        std::string buildResponse(const std::string& message, bool success);
+        // 处理获取会话列表的请求
+        void handleGetSessionLists(const httplib::Request& request, httplib::Response& response);
+        // 处理获取可用大模型列表的请求
+        void handleGetModelLists(const httplib::Request& request, httplib::Response& response);
+        // 处理创建会话的请求
+        void handleCreateSession(const httplib::Request& request, httplib::Response& response);
+        // 处理删除会话的请求
+        void handleDeleteSession(const httplib::Request& request, httplib::Response& response); 
+        // 处理获取历史消息的请求
+        void handleGetHistoryMessage(const httplib::Request& request, httplib::Response& response);
+        // 处理发送消息的请求 -- 全量发送
+        void handleSendMessage(const httplib::Request& request, httplib::Response& response);
+        // 处理发送消息的请求 -- 增量发送
+        void handleSendMessageStream(const httplib::Request& request, httplib::Response& response);
     private:
         // 服务器配置
         // 问：为什么要创建模型的配置信息？

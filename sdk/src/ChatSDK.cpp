@@ -257,7 +257,12 @@ namespace ai_chat_sdk
         }
 
         auto session = _sessionManager.getSession(sessionId);
-        // 获取历史消息，同时将本次消息加入历史消息一并发给大模型
+        if(!session)
+        {
+            ERROR("sendMessage: session {} not found", sessionId);
+            return "";
+        }
+
         Message new_message("user",message);
         if(_sessionManager.addMessage(sessionId,new_message))
         {
@@ -338,7 +343,7 @@ namespace ai_chat_sdk
         std::string reply_message = _llmManager.sendMessageStream(session->_mode_name,history_messages,params,callback);
         if(reply_message.empty())
         {
-            ERROR("sendMessage: send message to model failed, sessionId = {}", sessionId);
+            ERROR("sendMessageIncrement: send message to model failed, sessionId = {}", sessionId);
             return "";
         }
 

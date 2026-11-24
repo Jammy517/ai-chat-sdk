@@ -64,7 +64,6 @@ namespace ai_chat_sdk
     {
         // 问：这里需要添加模型名字和模型描述吗
         std::string _modelDesc;
-        std::string _modelName;
         std::string _endpoint;
     };
 

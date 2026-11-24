@@ -17,6 +17,9 @@ namespace ai_chat_sdk {
             exit(1);
         }
         INFO("打开数据库成功：{}", dbName);
+
+        // 开启外键约束（SQLite 默认 OFF，级联删除依赖它）
+        executeSQL("PRAGMA foreign_keys = ON;");
         
         // 创建消息数据库
         if(!initSQLTablle())
@@ -254,9 +257,9 @@ namespace ai_chat_sdk {
         while(rc == SQLITE_ROW)
         {
             std::string session_id = (const char*)sqlite3_column_text(stmt,0);
-            std::string model_name = (const char*)sqlite3_column_text(stmt,2);
-            int64_t create_time = sqlite3_column_int64(stmt,3);
-            int64_t update_time = sqlite3_column_int64(stmt,4);
+            std::string model_name = (const char*)sqlite3_column_text(stmt,1);
+            int64_t create_time = sqlite3_column_int64(stmt,2);
+            int64_t update_time = sqlite3_column_int64(stmt,3);
 
             // 构建会话对象
             std::shared_ptr<Session> session = std::make_shared<Session>(session_id);
@@ -340,7 +343,7 @@ namespace ai_chat_sdk {
         // INFO("deleteAllSession - 删除所有会话成功");
 
         // sqlite3_exec
-        if(executeSQL(deleteAllSession))
+        if(sqlite3_exec(_db,deleteAllSession.c_str(),nullptr,nullptr,nullptr) != SQLITE_OK)
         {
             ERROR("deleteAllSession - 执行sql语句失败：{}", sqlite3_errmsg(_db));
             return false;

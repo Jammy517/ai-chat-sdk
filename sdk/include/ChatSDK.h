@@ -49,7 +49,7 @@ namespace ai_chat_sdk
         bool initOllamaModels(const std::shared_ptr<OllamaConfig> config);
     private:
         bool _isInit = false;
-        // 问：为什么需要记录模型配置？
+        // 问：为什么需要记录模型配置？直接存放模型名不就可以，用一个数组
         std::unordered_map<std::string, std::shared_ptr<Config>> _modelConfig;
         LLMManager _llmManager;
     public:
