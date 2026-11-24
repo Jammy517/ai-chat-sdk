@@ -34,7 +34,7 @@ namespace ai_chat_sdk
     // id格式 : message_时间戳_会话计数
     std::string SessionManager::generateMessageId(size_t messageCounter)
     {
-        std::time_t timestamp = time(nullptr);
+        std::time_t timestamp = std::time(nullptr);
         messageCounter++;
         std::ostringstream os;
         os << "message_" << timestamp << "_" << std::setw(8) << std::setfill('0') << messageCounter;

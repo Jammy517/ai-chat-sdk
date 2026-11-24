@@ -179,15 +179,18 @@ namespace ai_chat_sdk {
             return nullptr;
         }
 
-        // 提取数据
-        std::string modelName = (const char*)sqlite3_column_text(stmt,1);
+        // 提取数据（sqlite3_column_text 可能返回 NULL，需判空）
+        auto toStr = [&](int col) -> std::string {
+            const char* raw = (const char*)sqlite3_column_text(stmt, col);
+            return raw ? raw : "";
+        };
+        std::string modelName = toStr(1);
         int64_t createAt = sqlite3_column_int64(stmt,2);
         int64_t updateAt = sqlite3_column_int64(stmt,3);
 
         // 创建会话对象
-        std::shared_ptr<Session> session = std::make_shared<Session>(sessionId);
-
-        session->_mode_name = modelName;
+        std::shared_ptr<Session> session = std::make_shared<Session>(modelName);
+        session->_id = sessionId;
         session->_createAt = createAt;
         session->_updateAt = updateAt;
 
@@ -256,14 +259,18 @@ namespace ai_chat_sdk {
         rc = sqlite3_step(stmt);
         while(rc == SQLITE_ROW)
         {
-            std::string session_id = (const char*)sqlite3_column_text(stmt,0);
-            std::string model_name = (const char*)sqlite3_column_text(stmt,1);
+            auto toStr = [&](int col) -> std::string {
+                const char* raw = (const char*)sqlite3_column_text(stmt, col);
+                return raw ? raw : "";
+            };
+            std::string session_id = toStr(0);
+            std::string model_name = toStr(1);
             int64_t create_time = sqlite3_column_int64(stmt,2);
             int64_t update_time = sqlite3_column_int64(stmt,3);
 
             // 构建会话对象
-            std::shared_ptr<Session> session = std::make_shared<Session>(session_id);
-            session->_mode_name = model_name;
+            std::shared_ptr<Session> session = std::make_shared<Session>(model_name);
+            session->_id = session_id;
             session->_createAt = create_time;
             session->_updateAt = update_time;
 
@@ -299,10 +306,13 @@ namespace ai_chat_sdk {
 
         // 执行sql语句
         rc = sqlite3_step(stmt);
+        auto toStr = [&](int col) -> std::string {
+            const char* raw = (const char*)sqlite3_column_text(stmt, col);
+            return raw ? raw : "";
+        };
         while(rc == SQLITE_ROW)
         {
-            std::string session_id = (const char*)sqlite3_column_text(stmt,0);
-            sessionIds.push_back(session_id);
+            sessionIds.push_back(toStr(0));
             rc = sqlite3_step(stmt);
         }
 
@@ -424,10 +434,13 @@ namespace ai_chat_sdk {
         rc = sqlite3_step(stmt);
         while(rc == SQLITE_ROW)
         {
-            // 获取参数
-            std::string message_id = (const char*)sqlite3_column_text(stmt, 0);
-            std::string role = (const char*)sqlite3_column_text(stmt, 1);
-            std::string content = (const char*)sqlite3_column_text(stmt, 2);
+            auto toStr = [&](int col) -> std::string {
+                const char* raw = (const char*)sqlite3_column_text(stmt, col);
+                return raw ? raw : "";
+            };
+            std::string message_id = toStr(0);
+            std::string role = toStr(1);
+            std::string content = toStr(2);
             int64_t timestamp = sqlite3_column_int64(stmt, 3);
 
             // 构建Message

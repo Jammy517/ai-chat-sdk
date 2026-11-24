@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <ctime>
 
 
 namespace ai_chat_sdk
@@ -16,7 +17,7 @@ namespace ai_chat_sdk
 
         // 问：为什么这里没有初始化_messageid？
         Message(std::string role, std::string content)
-        : _role(role), _content(content), _timestamp(time(nullptr))
+        : _role(role), _content(content), _timestamp(std::time(nullptr))
         {
         }
     };
@@ -31,7 +32,7 @@ namespace ai_chat_sdk
         time_t _updateAt;  // 该会话最新一次消息的时间
 
         Session(std::string mode = "")
-        :_mode_name(mode),_createAt(time(nullptr)),_updateAt(time(nullptr))
+        :_mode_name(mode),_createAt(std::time(nullptr)),_updateAt(std::time(nullptr))
         {}
     };
 

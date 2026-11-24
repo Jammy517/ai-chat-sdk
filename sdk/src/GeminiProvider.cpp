@@ -23,7 +23,10 @@ namespace ai_chat_sdk
         {
             _base_url = "https://generativelanguage.googleapis.com";
         }
-        _base_url = it->second;
+        else
+        {
+            _base_url = it->second;
+        }
         INFO("GeminiProvider: base_url set success!");
         INFO("GeminiProvider: apikey set success!");
         _isAvailable = true;
