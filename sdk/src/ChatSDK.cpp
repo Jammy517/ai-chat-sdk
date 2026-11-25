@@ -97,6 +97,10 @@ namespace ai_chat_sdk
                         continue;
                     }
                 }
+                else
+                {
+                    ERROR("Model {} is not supported", config->_mode_name);
+                }
             }
             else if(auto ollamaConfig = std::dynamic_pointer_cast<OllamaConfig>(config))
             {
@@ -127,7 +131,11 @@ namespace ai_chat_sdk
         // 注册模型
         std::map<std::string,std::string> modelParams;
         modelParams["apikey"] = config->_api_key;
-        _llmManager.initModel(config->_mode_name, modelParams);
+        if(!_llmManager.initModel(config->_mode_name, modelParams))
+        {
+            ERROR("initOllamaModels: init model {} failed", config->_mode_name);
+            return false;
+        }
 
         // 将模型信息和配置信息添加到_modelInfo中
         _modelConfig[config->_mode_name] = config;
@@ -149,7 +157,12 @@ namespace ai_chat_sdk
         modelParams["base_url"] = config->_endpoint;
         modelParams["model_name"] = config->_mode_name;
         modelParams["model_desc"] = config->_modelDesc;
-        _llmManager.initModel(config->_mode_name, modelParams);
+        if(!_llmManager.initModel(config->_mode_name, modelParams))
+        {
+            ERROR("initOllamaModels: init model {} failed", config->_mode_name);
+            return false;
+        }
+        _modelConfig[config->_mode_name] = config;
         return true;
     }
 

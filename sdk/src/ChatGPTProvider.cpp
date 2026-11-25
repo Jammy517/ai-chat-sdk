@@ -18,7 +18,8 @@ namespace ai_chat_sdk
             }
             else
             {
-               _base_url = "https://api.openai.com";
+                ERROR("ChatGPTProvider: apikey is not set!");
+                return false;
             }
 
             it = Model_Config.find("base_url");
@@ -97,7 +98,7 @@ namespace ai_chat_sdk
             httplib::Client client(_base_url);
             client.set_connection_timeout(30,0);
             client.set_read_timeout(60,0);
-            client.set_proxy("127.0.0.1",7890);        // todo: 配置代理服务器
+            client.set_proxy("127.0.0.1",7897);        // todo: 配置代理服务器
 
             // 7.构建请求头
             httplib::Headers headers = 

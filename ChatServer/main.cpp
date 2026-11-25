@@ -19,9 +19,9 @@ DEFINE_int32(max_tokens, 2048, "最大 token 数，必须为正整数");
 DEFINE_string(config_file, "", "配置文件路径（可选，文件中的参数会被命令行参数覆盖）");
 
 // Ollama 配置（云端模型 apikey 从环境变量读，不需要命令行参数）
-DEFINE_string(ollama_model_name, "", "Ollama 模型名称，例如 deepseek-r1:1.5b");
-DEFINE_string(ollama_model_desc, "", "Ollama 模型描述");
-DEFINE_string(ollama_endpoint, "", "Ollama API 地址，例如 http://127.0.0.1:11434");
+DEFINE_string(ollama_model_name, "deepseek-r1:1.5b", "Ollama 模型名称，例如 deepseek-r1:1.5b");
+DEFINE_string(ollama_model_desc, "本地部署deepseek-r1:1.5b模型，采用专家混合架构，专注于深度理解与推理", "Ollama 模型描述");
+DEFINE_string(ollama_endpoint, "http://127.0.0.1:11434", "Ollama API 地址，例如 http://127.0.0.1:11434");
 
 // 版本号
 const std::string VERSION = "1.0.0";

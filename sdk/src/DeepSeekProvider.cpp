@@ -35,7 +35,6 @@ namespace ai_chat_sdk
             INFO("DeepSeekProvider: base_url set success!");
         }
 
-        INFO("init success!!!");
         _isAvailable = true;
         return true;
     }

@@ -16,7 +16,11 @@ namespace ai_chat_sdk
             ERROR("GeminiProvider: apikey is empty!");
             return false;
         }
-        _apikey = it->second;
+        else 
+        {
+            INFO("GeminiProvider: apikey set success!");
+            _apikey = it->second;
+        }
 
         it = Model_Config.find("base_url");
         if(it == Model_Config.end())
@@ -27,8 +31,6 @@ namespace ai_chat_sdk
         {
             _base_url = it->second;
         }
-        INFO("GeminiProvider: base_url set success!");
-        INFO("GeminiProvider: apikey set success!");
         _isAvailable = true;
         return true;
 
